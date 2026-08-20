@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+volp-notification-agent-firebase-service-token.json
+
+node_modules/
+
+*.log
+logs/
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
