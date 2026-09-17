@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111111">
+    <title>VOLP Notification Agent</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>VOLP Notification Agent</h1>
+        <p>Assignment and Deadline Tracker</p>
+    </header>
+
+    <main class="container">
+        <section class="status-card">
+            <h2>Notification Status</h2>
+            <p id="notification-status">
+                Checking Notification Status...
+            </p>
+            <button id="enable-notifications">
+                Enable Notifications
+            </button>
+        </section>
+
+        <section class="alerts-section">
+            <div class="section-header">
+                <h2>Upcoming Alerts</h2>
+                <button class="refresh-alerts">
+                    Refresh
+                </button>
+            </div>
+            <div class="alerts-container">
+                <p>Loading Alerts</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    
+</body>
+</html>
