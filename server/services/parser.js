@@ -1,10 +1,8 @@
 import { parseVOLPDateTime } from './date.js';
-import { login } from '../API/api.js';
-import { getCourses } from '../API/api.js';
-import { getAssignmentList } from '../API/api.js';
 
-export function parseAssignments(assignments, crsId) {
+export function parseAssignments(assignments, crsId, userId) {
     const data = assignments.map(item => ({
+        userId: userId,
         assignmentId: item.ass_id,
         courseId: crsId,
         marks: Number(item.weightage),
@@ -18,12 +16,15 @@ export function parseAssignments(assignments, crsId) {
         submissionFile: item.submitted_answer_file_name ?? null,
         submissionPath: item.submitted_answer_file_path ?? null,
     }));
+
+    console.log(`Found ${data.length} assignments.`);
     
     return data;
 }
 
-export function parseCourses(courses) {
+export function parseCourses(courses, userId) {
     const data = courses.map(item => ({
+        userId: userId,
         courseId: item.crsid,
         courseOfferingLearnerId: item.colid,
         code: item.code,
@@ -35,11 +36,29 @@ export function parseCourses(courses) {
         active: Boolean(item.course_status),
         allowAssessment: Boolean(item.allow_assessment),
         archived: Boolean(item.is_archived)
-        }));
+    }));
 
+    console.log(`Found ${data.length} courses.`);
+    
     return data;
 }
 
+export function parseUsers(users) {
+    const data = users.map(item => ({
+        id: item.id,
+        email: item.email,
+        password: item.password_hash,
+        firstName: item.first_name ?? null, 
+        lastName: item.last_name ?? null,  
+        isActive: Boolean(item.is_active),
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+    }));
+
+    console.log(`Found ${data.length} users.`);
+
+    return data;
+}
 
 // const auth = await login();
 // const resp = await getCourses(auth);

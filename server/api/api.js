@@ -1,18 +1,16 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
-import { parseCourses } from '../services/parser.js';
+import axios from "axios";
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
-const username = process.env.VOLP_EMAIL;
-const password = process.env.VOLP_PASSWORD;
+// const email = process.env.VOLP_EMAIL;
+// const password = process.env.VOLP_PASSWORD;
 
-export async function login() {
-    const data = {};
-    const response = await axios.post(
+export async function login(email, password) {
+    const loginResponse = await axios.post(
         "https://admin.volp.in/login/process",
         {
-            username: username,
+            username: email,
             pwd: password,
         },
         {
@@ -27,13 +25,16 @@ export async function login() {
             }
         });
         
-        console.log("Login Status: ", response.status);
-        
-        data.token = response.data.token;
-        data.uid = response.data.uid;
-        data.ut = response.data.ut;
+        console.log("Login Status: ", loginResponse.status);
 
-        return data;
+        const { token, uid, ut, flag } = loginResponse.data || {};
+
+        if ((!token || !uid || !ut || flag === "NO")) {
+            console.log("Invalid college email or password");
+            return  { token, uid, ut, status: 401 };
+        }
+
+        return  { token, uid, ut, status: 200 };
 }
 
 export async function getCourses(auth) {
@@ -60,7 +61,7 @@ export async function getCourses(auth) {
         return data;
 }
 
-export async function getAssignmentList(course, auth) {
+export async function getAssignments(course, auth) {
     const response = await axios.post(
         "https://learner.volp.in/SubjectiveAssignment/getSubjectiveAssignment_new",
         {
@@ -89,23 +90,11 @@ export async function getAssignmentList(course, auth) {
     return data;
 }
 
-// const auth = await login();
-// if (auth) {
-//     const rawResp = await getCourses(auth);
-//     const resp = parseCourses(rawResp);
-//     if (resp) {
-//         console.log(resp[0])
-//         const data1 = await getAssignmentList(resp[0], auth);
-//         console.log(data1);
-//         const data2 = await getAssignmentList(resp[1], auth);
-//         console.log(data2);
-//         const data3 = await getAssignmentList(resp[2], auth);
-//         console.log(data3);
-//         const data4 = await getAssignmentList(resp[3], auth);
-//         console.log(data4);
-//     }
-// }
+
+// const auth = await login(email, password);
+// const courses = await getCourses(auth);
 
 
 
-
+// console.log(auth)
+// console.log(courses)
