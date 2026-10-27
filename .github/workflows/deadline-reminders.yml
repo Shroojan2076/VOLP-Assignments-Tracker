@@ -1,0 +1,38 @@
+name: Dispatch VOLP Deadline Reminders
+
+on:
+  schedule:
+    # 03:30 UTC = 09:00 AM IST daily
+    - cron: '30 3 * * *'
+  workflow_dispatch: # Allows manual click trigger from GitHub Actions tab
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install Server Dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Run Deadline Notification Dispatcher
+        working-directory: server
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT || '465' }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE || 'true' }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM || 'VOLP Academic Alerts <jsonbotauto@gmail.com>' }}
+        run: npm run notify:deadlines
