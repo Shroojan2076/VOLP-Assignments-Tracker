@@ -1,13 +1,10 @@
 export function getApiBase() {
   const custom = localStorage.getItem('volp_custom_backend_url');
-  if (custom && custom.trim()) {
-    let clean = custom.trim().replace(/\/+$/, '');
-    if (!clean.endsWith('/api')) {
-      clean = `${clean}/api`;
-    }
-    return clean;
-  }
-  return import.meta.env.VITE_API_BASE_URL || '/api';
+  const rawUrl = (custom && custom.trim()) || import.meta.env.VITE_API_BASE_URL || '';
+  let clean = rawUrl.trim().replace(/\/+$/, '');
+  // Normalize base so it does not contain a trailing /api (we explicitly include /api in endpoints)
+  clean = clean.replace(/\/api$/, '');
+  return clean;
 }
 
 export function setCustomBackendUrl(url) {
@@ -38,7 +35,7 @@ export async function checkBackendConnection() {
   const apiBase = getApiBase();
   const fallbackHost = getTargetHost();
   try {
-    const res = await fetch(`${apiBase}/health`, { method: 'GET' });
+    const res = await fetch(`${apiBase}/api/health`, { method: 'GET' });
     const data = await res.json().catch(() => ({}));
     const dynamicHost = data.host || fallbackHost;
 
@@ -101,7 +98,7 @@ export async function loginUser(email, password) {
   const host = getTargetHost();
   try {
     const user = { email, password };
-    const res = await fetch(`${apiBase}/auth/login`, {
+    const res = await fetch(`${apiBase}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user })
@@ -140,7 +137,7 @@ export async function registerUser(credentials, maybePassword) {
       ? { ...credentials }
       : { email: credentials, password: maybePassword };
 
-    const res = await fetch(`${apiBase}/auth/register`, {
+    const res = await fetch(`${apiBase}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user })
@@ -177,7 +174,7 @@ export async function getCourses(userEmail) {
     if (!userEmail) {
       return { success: false, data: [] };
     }
-    const res = await fetch(`${apiBase}/fetch/courses?email=${encodeURIComponent(userEmail)}`);
+    const res = await fetch(`${apiBase}/api/fetch/courses?email=${encodeURIComponent(userEmail)}`);
     if (res.ok) {
       const data = await res.json();
       const rawCourses = data.courses || (Array.isArray(data) ? data : []);
@@ -196,7 +193,7 @@ export async function getAssignments(userEmail, courseId) {
     if (!userEmail) {
       return { success: false, data: [] };
     }
-    let url = `${apiBase}/fetch/assignments?email=${encodeURIComponent(userEmail)}`;
+    let url = `${apiBase}/api/fetch/assignments?email=${encodeURIComponent(userEmail)}`;
     if (courseId) url += `&courseId=${encodeURIComponent(courseId)}`;
     const res = await fetch(url);
     if (res.ok) {
