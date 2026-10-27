@@ -52,9 +52,8 @@ export async function runDeadlineEmailJob() {
     }
 }
 
-// Automatically execute if run directly via Node CLI
 const isDirectRun = process.argv[1] && (
-    process.argv[1].endsWith("sendDeadlineEmails.js") || 
+    process.argv[1].endsWith("sendDeadlineEmails.js") ||
     process.argv[1].includes("sendDeadlineEmails")
 );
 
