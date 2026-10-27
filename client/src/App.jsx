@@ -1,7 +1,6 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
-import BackendBanner from './components/BackendBanner';
 import AuthView from './components/AuthView';
 import DashboardView from './components/DashboardView';
 
@@ -11,7 +10,6 @@ function MainLayout() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <BackendBanner />
 
       <main style={{ flex: 1 }}>
         {isAuthenticated ? (
@@ -23,22 +21,21 @@ function MainLayout() {
 
       <footer style={{
         padding: '1.5rem',
-        textAlign: 'center',
         borderTop: '1px solid var(--border-subtle)',
-        backgroundColor: 'rgba(7, 9, 14, 0.95)',
+        backgroundColor: 'var(--bg-canvas)',
         fontSize: '0.78rem',
         color: 'var(--text-muted)'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
-            VOLP Tracker • Reverse-Engineered Academic Sync Prototype
+            VOLP Desk • A calm companion for classroom.volp.in
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <span>PostgreSQL: Neon Cloud DB</span>
+          <div style={{ display: 'flex', gap: '0.85rem', color: 'var(--text-dim)', fontSize: '0.74rem' }}>
+            <span>PostgreSQL Database</span>
             <span>•</span>
-            <span>API: Node.js & Express</span>
+            <span>Automated Daily Sync</span>
             <span>•</span>
-            <span>Frontend: React + Vite</span>
+            <span>Student Field Guide</span>
           </div>
         </div>
       </footer>

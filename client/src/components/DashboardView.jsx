@@ -4,21 +4,27 @@ import { getCourses, getAssignments } from '../services/api';
 import StatsOverview from './StatsOverview';
 import CourseGrid from './CourseGrid';
 import AssignmentList from './AssignmentList';
+import AssignmentModal from './AssignmentModal';
 import { 
-  RefreshCw, 
   ExternalLink, 
-  Sparkles,
-  Calendar,
-  Layers,
-  Database
+  CalendarCheck
 } from 'lucide-react';
 
+function getGreeting(name) {
+  const hour = new Date().getHours();
+  const firstName = name ? name.split(' ')[0] : 'there';
+  if (hour < 12) return `Good morning, ${firstName}.`;
+  if (hour < 17) return `Good afternoon, ${firstName}.`;
+  return `Good evening, ${firstName}.`;
+}
+
 export default function DashboardView() {
-  const { user, isDemoMode, syncState, syncNow } = useAuth();
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeModalAssignment, setActiveModalAssignment] = useState(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -33,95 +39,77 @@ export default function DashboardView() {
 
   useEffect(() => {
     loadData();
-  }, [user, syncState.lastSynced]);
+  }, [user]);
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem' }}>
-      {/* Welcome Banner */}
+    <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      {/* Human Masthead Greeting */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         marginBottom: '2rem',
         flexWrap: 'wrap',
-        gap: '1rem'
+        gap: '1.25rem'
       }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-              Welcome, {user?.firstName || 'Student'}!
-            </h2>
-            {isDemoMode && (
-              <span className="badge badge-amber" style={{ fontSize: '0.72rem' }}>
-                <Sparkles size={11} /> Sandbox Preview
-              </span>
-            )}
-          </div>
+          <h2 className="font-serif" style={{
+            fontSize: '2.2rem',
+            fontWeight: 400,
+            letterSpacing: '-0.02em',
+            color: 'var(--text-main)',
+            lineHeight: 1.2,
+            marginBottom: '0.35rem'
+          }}>
+            {getGreeting(user?.firstName)}
+          </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
-            College ID: <span style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{user?.email}</span> • Synchronized with Neon PostgreSQL
+            <span style={{ color: 'var(--text-muted)' }}>Student Desk for </span>
+            <span style={{ color: 'var(--text-main)', fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}>
+              {user?.email}
+            </span>
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="btn-secondary"
-            style={{ fontSize: '0.8rem', padding: '0.5rem 0.9rem' }}
-            title="Reload local data"
-            id="reload-dashboard-data-button"
-          >
-            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            <span>Reload Views</span>
-          </button>
-
           <a
             href="https://classroom.volp.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary"
-            style={{ fontSize: '0.8rem', padding: '0.5rem 0.9rem', textDecoration: 'none' }}
+            className="btn-secondary"
+            style={{ fontSize: '0.8rem', padding: '0.5rem 0.95rem', textDecoration: 'none' }}
           >
-            <span>Open VOLP Portal</span>
-            <ExternalLink size={13} />
+            <span>Open VOLP Classroom</span>
+            <ExternalLink size={13} style={{ opacity: 0.7 }} />
           </a>
         </div>
       </div>
 
-      {/* Metric Cards */}
+      {/* Stats Summary Bulletin */}
       <StatsOverview courses={courses} assignments={assignments} />
 
-      {/* Empty State Action when 0 courses are in database */}
+      {/* Empty State when no courses have synced yet */}
       {courses.length === 0 && !loading && (
-        <div className="glass-panel" style={{
-          padding: '2.5rem 1.5rem',
+        <div className="craft-card" style={{
+          padding: '3rem 2rem',
           textAlign: 'center',
           marginBottom: '2rem',
-          border: '1px dashed var(--border-glow)',
-          backgroundColor: 'rgba(15, 23, 42, 0.45)'
+          backgroundColor: 'rgba(255, 255, 255, 0.02)'
         }}>
-          <h3 style={{ fontSize: '1.2rem', color: '#fff', fontWeight: 700, marginBottom: '0.4rem' }}>
-            No Synchronized Courses Found
+          <CalendarCheck size={36} style={{ color: 'var(--accent-amber)', margin: '0 auto 0.85rem auto', opacity: 0.8 }} />
+          <h3 className="font-serif" style={{ fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: 400, marginBottom: '0.4rem' }}>
+            Your coursework desk is ready.
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', maxWidth: '520px', margin: '0 auto 1.25rem auto', lineHeight: 1.5 }}>
-            Your account is authenticated, but your database portfolio has not populated courses or assignments yet.
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '480px', margin: '0 auto', lineHeight: 1.5 }}>
+            Your student account is connected. As soon as the daily portal sync runs, your enrolled subjects and subjective assignments will automatically populate here.
           </p>
-          <button
-            onClick={syncNow}
-            disabled={syncState.isSyncing}
-            className="btn-primary"
-            style={{ padding: '0.65rem 1.4rem', fontSize: '0.85rem' }}
-            id="empty-state-sync-button"
-          >
-            <RefreshCw size={14} className={syncState.isSyncing ? 'animate-spin' : ''} />
-            <span>{syncState.isSyncing ? 'Syncing Portfolio...' : 'Sync Now with VOLP'}</span>
-          </button>
         </div>
       )}
 
       {/* Courses Explorer */}
       <CourseGrid
         courses={courses}
+        assignments={assignments}
         selectedCourseId={selectedCourseId}
         onSelectCourse={setSelectedCourseId}
       />
@@ -130,7 +118,16 @@ export default function DashboardView() {
       <AssignmentList
         assignments={assignments}
         selectedCourseId={selectedCourseId}
+        onSelectAssignment={setActiveModalAssignment}
       />
+
+      {/* Assignment Modal if opened */}
+      {activeModalAssignment && (
+        <AssignmentModal
+          assignment={activeModalAssignment}
+          onClose={() => setActiveModalAssignment(null)}
+        />
+      )}
     </div>
   );
 }

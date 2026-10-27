@@ -1,13 +1,12 @@
 import React from 'react';
 import { 
-  BookOpen, 
-  UserCheck, 
-  CheckCircle2, 
-  ExternalLink,
-  Filter
+  User, 
+  X
 } from 'lucide-react';
 
-export default function CourseGrid({ courses = [], selectedCourseId, onSelectCourse }) {
+export default function CourseGrid({ courses = [], assignments = [], selectedCourseId, onSelectCourse }) {
+  if (courses.length === 0) return null;
+
   return (
     <div style={{ marginBottom: '2.5rem' }}>
       <div style={{
@@ -19,11 +18,11 @@ export default function CourseGrid({ courses = [], selectedCourseId, onSelectCou
         gap: '0.5rem'
       }}>
         <div>
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff' }}>
-            Enrolled Academic Courses
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
+            Enrolled Subjects
           </h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Synchronized directly from VOLP Classroom Learner Dashboard
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            Select any subject to filter its specific assignments below
           </p>
         </div>
 
@@ -31,116 +30,131 @@ export default function CourseGrid({ courses = [], selectedCourseId, onSelectCou
           <button
             onClick={() => onSelectCourse(null)}
             className="btn-secondary"
-            style={{ fontSize: '0.78rem', padding: '0.4rem 0.8rem' }}
+            style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             id="clear-course-filter-button"
           >
-            <span>Showing filtered course • Click to show all</span>
+            <span>Clear subject filter</span>
+            <X size={12} />
           </button>
         )}
       </div>
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: '1.25rem'
+        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gap: '1rem'
       }}>
         {courses.map(course => {
           const isSelected = selectedCourseId === course.courseId;
-          const progressVal = Number(course.progress) || 0;
+
+          // Compute course assignment counts
+          const courseAssignments = assignments.filter(a => a.courseId === course.courseId);
+          const pendingCourseCount = courseAssignments.filter(a => !a.submitted).length;
+          const submittedCourseCount = courseAssignments.filter(a => a.submitted).length;
 
           return (
             <div
               key={course.courseId}
               onClick={() => onSelectCourse(isSelected ? null : course.courseId)}
-              className="glass-panel"
+              className="craft-card"
               style={{
-                padding: '1.25rem',
+                padding: '1.2rem',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-                borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-subtle)',
-                boxShadow: isSelected ? '0 0 20px rgba(99, 102, 241, 0.3)' : 'var(--shadow-card)',
-                backgroundColor: isSelected ? 'rgba(25, 36, 64, 0.85)' : 'var(--bg-card)'
+                borderColor: isSelected ? 'var(--accent-amber)' : 'var(--border-subtle)',
+                backgroundColor: isSelected ? 'var(--bg-elevated)' : 'var(--bg-surface)',
+                boxShadow: isSelected ? '0 0 0 1px var(--accent-amber), var(--shadow-card)' : 'var(--shadow-card)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative'
               }}
               id={`course-card-${course.courseId}`}
             >
-              {/* Header tags */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-                <span className="badge badge-indigo" style={{ fontFamily: 'var(--font-mono)' }}>
-                  {course.code}
-                </span>
-                <span className={`badge ${course.active ? 'badge-emerald' : 'badge-amber'}`}>
-                  {course.active ? 'Active' : 'Archived'}
-                </span>
-              </div>
+              <div>
+                {/* Header row: Course code badge & status */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: isSelected ? 'var(--accent-amber)' : 'var(--text-main)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                    padding: '0.15rem 0.45rem',
+                    borderRadius: 'var(--radius-xs)',
+                    border: '1px solid var(--border-subtle)'
+                  }}>
+                    {course.code}
+                  </span>
 
-              {/* Title & Professor */}
-              <h4 style={{
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                color: '#fff',
-                marginBottom: '0.4rem',
-                lineHeight: 1.3,
-                minHeight: '2.6em',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}>
-                {course.name}
-              </h4>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '0.78rem',
-                color: 'var(--text-secondary)',
-                marginBottom: '1rem'
-              }}>
-                <UserCheck size={14} style={{ color: 'var(--accent-cyan)' }} />
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {course.professor || 'Instructor Assigned'}
-                </span>
-              </div>
-
-              {/* Progress Bar */}
-              <div style={{ marginBottom: '0.85rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.35rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Syllabus Progress</span>
-                  <span style={{ color: '#fff', fontWeight: 600 }}>{progressVal}%</span>
+                  {course.active ? (
+                    <span className="stamp stamp-sage" style={{ fontSize: '0.65rem' }}>Active</span>
+                  ) : (
+                    <span className="stamp stamp-muted" style={{ fontSize: '0.65rem' }}>Archived</span>
+                  )}
                 </div>
-                <div style={{
-                  width: '100%',
-                  height: '6px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  borderRadius: 'var(--radius-full)',
+
+                {/* Course Name */}
+                <h4 style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 600,
+                  color: 'var(--text-main)',
+                  lineHeight: 1.35,
+                  marginBottom: '0.45rem',
+                  minHeight: '2.5em',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
                   overflow: 'hidden'
                 }}>
-                  <div style={{
-                    width: `${progressVal}%`,
-                    height: '100%',
-                    background: progressVal >= 80 
-                      ? 'linear-gradient(90deg, #6366f1, #10b981)' 
-                      : 'linear-gradient(90deg, #6366f1, #06b6d4)',
-                    borderRadius: 'var(--radius-full)',
-                    transition: 'width 0.5s ease'
-                  }} />
+                  {course.name}
+                </h4>
+
+                {/* Faculty Name */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.76rem',
+                  color: 'var(--text-muted)',
+                  marginBottom: '1rem'
+                }}>
+                  <User size={13} style={{ opacity: 0.6 }} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {course.professor || 'Instructor Assigned'}
+                  </span>
                 </div>
               </div>
 
-              {/* Footer action */}
+              {/* Footer status summary */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                fontSize: '0.74rem',
-                paddingTop: '0.75rem',
+                fontSize: '0.73rem',
+                paddingTop: '0.65rem',
                 borderTop: '1px solid var(--border-subtle)',
-                color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)'
+                color: 'var(--text-muted)'
               }}>
-                <span>Course ID: {course.courseId}</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontWeight: 600 }}>
-                  {isSelected ? 'Filtering Active' : 'View Assignments'} &rarr;
+                <div>
+                  {courseAssignments.length > 0 ? (
+                    <span>
+                      <strong style={{ color: pendingCourseCount > 0 ? 'var(--accent-amber)' : 'var(--text-main)' }}>
+                        {pendingCourseCount} due
+                      </strong>
+                      {' • '}
+                      {submittedCourseCount} turned in
+                    </span>
+                  ) : (
+                    <span>No active tasks</span>
+                  )}
+                </div>
+
+                <span style={{
+                  fontSize: '0.72rem',
+                  color: isSelected ? 'var(--accent-amber)' : 'var(--text-dim)',
+                  fontWeight: 600
+                }}>
+                  {isSelected ? 'Filtered' : 'Filter →'}
                 </span>
               </div>
             </div>

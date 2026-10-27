@@ -3,18 +3,26 @@ import {
   X, 
   Calendar, 
   Clock, 
-  FileText, 
   Award, 
   CheckCircle2, 
-  AlertCircle,
-  FileCheck,
-  FolderOpen
+  FileText
 } from 'lucide-react';
+
+function formatModalDate(dateStr) {
+  if (!dateStr) return 'Not set by instructor';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString([], { 
+    weekday: 'short', 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  }) + ' at ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
 
 export default function AssignmentModal({ assignment, onClose }) {
   if (!assignment) return null;
 
-  const isOverdue = !assignment.submitted && new Date(assignment.dueDate) < new Date();
+  const isOverdue = !assignment.submitted && assignment.dueDate && new Date(assignment.dueDate) < new Date();
   const isGraceActive = !assignment.submitted && isOverdue && assignment.graceDate && new Date(assignment.graceDate) > new Date();
 
   return (
@@ -24,24 +32,26 @@ export default function AssignmentModal({ assignment, onClose }) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      backgroundColor: 'rgba(0, 0, 0, 0.72)',
       backdropFilter: 'blur(8px)',
       zIndex: 50,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1rem'
+      padding: '1.25rem'
     }}>
       <div 
-        className="glass-panel"
+        className="craft-card"
         style={{
           width: '100%',
-          maxWidth: '640px',
-          maxHeight: '90vh',
+          maxWidth: '620px',
+          maxHeight: '88vh',
           overflowY: 'auto',
-          backgroundColor: 'rgba(13, 18, 31, 0.95)',
+          backgroundColor: 'var(--bg-surface)',
           padding: '2rem',
-          position: 'relative'
+          position: 'relative',
+          border: '1px solid var(--border-medium)',
+          boxShadow: 'var(--shadow-elevated)'
         }}
       >
         {/* Close Button */}
@@ -55,66 +65,80 @@ export default function AssignmentModal({ assignment, onClose }) {
             border: 'none',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: '0.25rem'
+            padding: '0.35rem',
+            borderRadius: 'var(--radius-xs)',
+            transition: 'color 0.15s ease'
           }}
+          title="Close sheet"
           id="close-assignment-modal-button"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
         {/* Top Badges */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <span className="badge badge-indigo" style={{ fontFamily: 'var(--font-mono)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            color: 'var(--text-main)',
+            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+            padding: '0.15rem 0.45rem',
+            borderRadius: 'var(--radius-xs)',
+            border: '1px solid var(--border-subtle)'
+          }}>
             {assignment.courseCode || `Course #${assignment.courseId}`}
           </span>
-          <span className={`badge ${
+
+          <span className={`stamp ${
             assignment.submitted 
-              ? 'badge-emerald' 
+              ? 'stamp-sage' 
               : isGraceActive 
-                ? 'badge-amber' 
+                ? 'stamp-amber' 
                 : isOverdue 
-                  ? 'badge-rose' 
-                  : 'badge-cyan'
+                  ? 'stamp-terracotta' 
+                  : 'stamp-sky'
           }`}>
             {assignment.submitted 
-              ? 'Submitted' 
+              ? '✓ Turned In' 
               : isGraceActive 
-                ? 'Grace Period Active' 
+                ? 'Grace Window Active' 
                 : isOverdue 
-                  ? 'Overdue' 
-                  : 'Action Required'}
+                  ? 'Past Official Deadline' 
+                  : 'Action Needed'}
           </span>
+
           {assignment.evaluated && (
-            <span className="badge badge-emerald">
+            <span className="stamp stamp-sage">
               Graded: {assignment.score} / {assignment.marks}
             </span>
           )}
         </div>
 
-        {/* Assignment ID & Title */}
-        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-          Assignment Reference ID: <span style={{ fontFamily: 'var(--font-mono)', color: '#a5b4fc' }}>#{assignment.assignmentId}</span>
+        {/* Course Reference & Title */}
+        <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginBottom: '0.25rem', fontFamily: 'var(--font-mono)' }}>
+          Reference #{assignment.assignmentId}
         </div>
-        <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#fff', marginBottom: '1.25rem', lineHeight: 1.3 }}>
-          {assignment.courseName ? `${assignment.courseName} - Subjective Assessment` : 'Subjective Assignment Details'}
+        <h3 className="font-serif" style={{ fontSize: '1.45rem', fontWeight: 400, color: 'var(--text-main)', marginBottom: '1.25rem', lineHeight: 1.3 }}>
+          {assignment.courseName ? assignment.courseName : 'Subjective Coursework Dossier'}
         </h3>
 
         {/* Question Text Box */}
         <div style={{
-          backgroundColor: 'rgba(15, 23, 42, 0.8)',
+          backgroundColor: 'var(--bg-inset)',
           border: '1px solid var(--border-subtle)',
           borderRadius: 'var(--radius-md)',
           padding: '1.25rem',
           marginBottom: '1.5rem',
           fontSize: '0.9rem',
           lineHeight: 1.6,
-          color: 'var(--text-primary)'
+          color: 'var(--text-main)'
         }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            Problem Statement / Question
+          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.6rem' }}>
+            Problem Statement / Prompt
           </div>
           <div style={{ whiteSpace: 'pre-wrap' }}>
-            {assignment.question || 'No description provided by professor.'}
+            {assignment.question || 'No question description was provided by the professor.'}
           </div>
         </div>
 
@@ -122,22 +146,22 @@ export default function AssignmentModal({ assignment, onClose }) {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
+          gap: '0.85rem',
           marginBottom: '1.5rem'
         }}>
           {/* Due Date */}
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--border-subtle)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.73rem', marginBottom: '0.25rem' }}>
               <Calendar size={13} />
-              <span>Official Deadline</span>
+              <span>Official Due Date</span>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
-              {assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'Not Set'}
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+              {formatModalDate(assignment.dueDate)}
             </div>
           </div>
 
@@ -145,15 +169,15 @@ export default function AssignmentModal({ assignment, onClose }) {
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--border-subtle)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.73rem', marginBottom: '0.25rem' }}>
               <Clock size={13} />
-              <span>Grace Date Limit</span>
+              <span>Grace Period Cutoff</span>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: isGraceActive ? '#fbbf24' : '#fff' }}>
-              {assignment.graceDate ? new Date(assignment.graceDate).toLocaleString() : 'No Grace Window'}
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: isGraceActive ? 'var(--accent-amber)' : 'var(--text-main)' }}>
+              {formatModalDate(assignment.graceDate)}
             </div>
           </div>
 
@@ -161,14 +185,14 @@ export default function AssignmentModal({ assignment, onClose }) {
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--border-subtle)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.73rem', marginBottom: '0.25rem' }}>
               <Award size={13} />
-              <span>Maximum Marks</span>
+              <span>Assigned Weightage</span>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
               {assignment.marks} Points
             </div>
           </div>
@@ -177,15 +201,15 @@ export default function AssignmentModal({ assignment, onClose }) {
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--border-subtle)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.73rem', marginBottom: '0.25rem' }}>
               <CheckCircle2 size={13} />
-              <span>Evaluation Status</span>
+              <span>Faculty Evaluation</span>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: assignment.evaluated ? '#34d399' : 'var(--text-muted)' }}>
-              {assignment.evaluated ? `Awarded ${assignment.score} pts` : 'Awaiting Grading'}
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: assignment.evaluated ? '#4ade80' : 'var(--text-muted)' }}>
+              {assignment.evaluated ? `Awarded ${assignment.score} / ${assignment.marks} pts` : 'Awaiting instructor evaluation'}
             </div>
           </div>
         </div>
@@ -193,21 +217,21 @@ export default function AssignmentModal({ assignment, onClose }) {
         {/* Submission Details if submitted */}
         {assignment.submitted && (
           <div style={{
-            padding: '1rem',
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: 'rgba(16, 185, 129, 0.08)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
+            padding: '0.9rem 1.1rem',
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: 'var(--accent-sage-soft)',
+            border: '1px solid rgba(52, 168, 83, 0.3)',
             marginBottom: '1.5rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#34d399', fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.4rem' }}>
-              <FileCheck size={16} />
-              <span>Submitted Artifact</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4ade80', fontWeight: 600, fontSize: '0.82rem', marginBottom: '0.35rem' }}>
+              <FileText size={15} />
+              <span>Submitted Assignment File</span>
             </div>
-            <div style={{ fontSize: '0.82rem', color: '#fff', fontFamily: 'var(--font-mono)', marginBottom: '0.2rem' }}>
-              {assignment.submissionFile || 'File submitted directly to VOLP Portal'}
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontFamily: 'var(--font-mono)', marginBottom: '0.15rem' }}>
+              {assignment.submissionFile || 'File uploaded directly to classroom.volp.in'}
             </div>
             {assignment.submissionPath && (
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
                 Path: {assignment.submissionPath}
               </div>
             )}
@@ -215,13 +239,13 @@ export default function AssignmentModal({ assignment, onClose }) {
         )}
 
         {/* Footer actions */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
           <button
             onClick={onClose}
             className="btn-secondary"
             id="modal-close-action-button"
           >
-            Close Overview
+            Close Sheet
           </button>
         </div>
       </div>

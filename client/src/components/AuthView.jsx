@@ -1,23 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
-  GraduationCap, 
-  ShieldCheck, 
-  KeyRound, 
-  Mail, 
-  User, 
+  Clock, 
+  CheckCircle2, 
+  BookMarked,
   ArrowRight, 
-  AlertCircle,
-  Sparkles,
-  CheckCircle2,
-  Lock,
-  Layers,
-  Clock
+  AlertCircle
 } from 'lucide-react';
 
 export default function AuthView() {
-  const { login, register, loginDemo, backendState } = useAuth();
-  const [tab, setTab] = useState('register'); // Default to register as emphasized by user
+  const { login, register } = useAuth();
+  const [tab, setTab] = useState('login');
 
   // Form states
   const [email, setEmail] = useState('');
@@ -28,208 +21,200 @@ export default function AuthView() {
   const [loading, setLoading] = useState(false);
   const [statusStep, setStatusStep] = useState('');
   const [error, setError] = useState('');
-  const [endpointMissingNotice, setEndpointMissingNotice] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setEndpointMissingNotice(false);
     setLoading(true);
 
     if (tab === 'register') {
-      setStatusStep('Verifying credentials against official VOLP servers...');
+      setStatusStep('Checking credentials with college portal...');
       const res = await register({ email, password, firstName, lastName });
       
       if (!res.success) {
         setLoading(false);
         setStatusStep('');
-        if (res.isEndpointMissing) {
-          setEndpointMissingNotice(true);
-        } else {
-          setError(res.message);
-        }
+        setError(res.message || 'We couldn’t verify these credentials on the college portal. Please check your email and password.');
       }
     } else {
-      setStatusStep('Authenticating session...');
+      setStatusStep('Signing you in...');
       const res = await login(email, password);
 
       if (!res.success) {
         setLoading(false);
         setStatusStep('');
-        if (res.isEndpointMissing) {
-          setEndpointMissingNotice(true);
-        } else {
-          setError(res.message);
-        }
+        setError(res.message || 'Incorrect college email or password.');
       }
     }
   };
 
-  const handleQuickDemo = (role = 'VIT Student') => {
-    loginDemo({
-      id: 1,
-      email: email || 'shroojan.1251090062@vit.edu',
-      firstName: firstName || 'Shroojan',
-      lastName: lastName || 'Gaikwad',
-      isActive: true,
-      createdAt: new Date().toISOString()
-    });
-  };
-
   return (
     <div style={{
-      minHeight: 'calc(100vh - 75px)',
+      minHeight: 'calc(100vh - 120px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem 1rem'
+      padding: '2.5rem 1rem'
     }}>
       <div style={{
-        maxWidth: '960px',
+        maxWidth: '920px',
         width: '100%',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '2rem',
+        gap: '3rem',
         alignItems: 'center'
       }}>
-        {/* Left Column: Platform info & VOLP Verification badge */}
+        {/* Left Column: Human, editorial, warm copy */}
         <div>
-          <div className="badge badge-indigo" style={{ marginBottom: '1rem', padding: '0.35rem 0.75rem' }}>
-            <ShieldCheck size={14} /> Official VOLP Credential Gateway
-          </div>
-          <h2 style={{
-            fontSize: '2.5rem',
-            fontWeight: 800,
+          <span className="stamp stamp-amber" style={{ marginBottom: '1.25rem' }}>
+            Academic Field Guide
+          </span>
+          
+          <h1 className="font-serif" style={{
+            fontSize: '2.75rem',
             lineHeight: 1.15,
-            letterSpacing: '-0.03em',
-            marginBottom: '1rem',
-            background: 'linear-gradient(135deg, #ffffff 30%, #94a3b8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            fontWeight: 400,
+            letterSpacing: '-0.02em',
+            color: 'var(--text-main)',
+            marginBottom: '1rem'
           }}>
-            Unified Academic Sync for VOLP Classrooms
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-            Connect your college credentials to automate assignment tracking, grade evaluation monitoring, and course deadlines in one clean dashboard.
+            Your coursework, <br />
+            <span style={{ fontStyle: 'italic', color: 'var(--accent-amber)' }}>organized with clarity.</span>
+          </h1>
+
+          <p style={{
+            color: 'var(--text-secondary)',
+            fontSize: '0.95rem',
+            lineHeight: 1.6,
+            marginBottom: '2.25rem',
+            maxWidth: '440px'
+          }}>
+            VOLP Desk bridges directly with your college classroom portal. Check due dates, submission statuses, and professor evaluation remarks in a calm, distraction-free environment.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
               <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(99, 102, 241, 0.15)',
-                color: 'var(--accent-primary)',
+                width: '32px',
+                height: '32px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'rgba(229, 142, 57, 0.1)',
+                color: 'var(--accent-amber)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Lock size={18} />
+                <Clock size={16} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>Active Credential Verification</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Registration queries the live VOLP server. Only credentials that yield a valid session token (<code style={{ color: '#a5b4fc' }}>token, uid, ut</code>) are enrolled into the database.
+                <h4 style={{ fontSize: '0.88rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                  Intelligent Deadline Awareness
+                </h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                  Clear countdowns for official due dates and faculty grace periods, so you know exactly how much time remains.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
               <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(6, 182, 212, 0.15)',
-                color: 'var(--accent-cyan)',
+                width: '32px',
+                height: '32px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                color: '#34a853',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Layers size={18} />
+                <CheckCircle2 size={16} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>Automated Course & Assignment Sync</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Subjective assignments, grace periods, submission statuses, and professor remarks are mapped directly into your PostgreSQL portfolio.
+                <h4 style={{ fontSize: '0.88rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                  Grades & Instructor Remarks
+                </h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                  Instant visibility into evaluated scores, submission files, and feedback without navigating through nested portal menus.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
               <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                color: 'var(--accent-emerald)',
+                width: '32px',
+                height: '32px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                color: '#38bdf8',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Clock size={18} />
+                <BookMarked size={16} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>24-Hour Deadline Tracking</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Intelligent deadline awareness tailored for VOLP's timestamp formats with grace period countdowns.
+                <h4 style={{ fontSize: '0.88rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                  Course Binder
+                </h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                  A neat overview of your enrolled modules, instructors, and subjective coursework all in one desk view.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Auth Card */}
-        <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-          {/* Tabs */}
+        {/* Right Column: Clean Stationery Card */}
+        <div className="craft-card" style={{ padding: '2rem' }}>
+          {/* Notebook Tab Switcher */}
           <div style={{
             display: 'flex',
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-            borderRadius: 'var(--radius-md)',
+            backgroundColor: 'var(--bg-inset)',
+            borderRadius: 'var(--radius-sm)',
             padding: '0.25rem',
-            marginBottom: '1.5rem',
+            marginBottom: '1.75rem',
             border: '1px solid var(--border-subtle)'
           }}>
             <button
-              onClick={() => { setTab('register'); setError(''); setEndpointMissingNotice(false); }}
+              onClick={() => { setTab('login'); setError(''); }}
               style={{
                 flex: 1,
-                padding: '0.6rem 0',
-                borderRadius: 'calc(var(--radius-md) - 2px)',
-                background: tab === 'register' ? 'var(--accent-primary)' : 'transparent',
-                color: tab === 'register' ? '#fff' : 'var(--text-secondary)',
+                padding: '0.55rem 0',
+                borderRadius: 'calc(var(--radius-sm) - 1px)',
+                background: tab === 'login' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                color: tab === 'login' ? 'var(--text-main)' : 'var(--text-muted)',
                 border: 'none',
                 fontWeight: 600,
-                fontSize: '0.85rem',
+                fontSize: '0.82rem',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-                fontFamily: 'inherit'
-              }}
-              id="tab-register"
-            >
-              Register & Verify
-            </button>
-            <button
-              onClick={() => { setTab('login'); setError(''); setEndpointMissingNotice(false); }}
-              style={{
-                flex: 1,
-                padding: '0.6rem 0',
-                borderRadius: 'calc(var(--radius-md) - 2px)',
-                background: tab === 'login' ? 'var(--accent-primary)' : 'transparent',
-                color: tab === 'login' ? '#fff' : 'var(--text-secondary)',
-                border: 'none',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'all 0.15s ease',
                 fontFamily: 'inherit'
               }}
               id="tab-login"
             >
               Sign In
+            </button>
+            <button
+              onClick={() => { setTab('register'); setError(''); }}
+              style={{
+                flex: 1,
+                padding: '0.55rem 0',
+                borderRadius: 'calc(var(--radius-sm) - 1px)',
+                background: tab === 'register' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                color: tab === 'register' ? 'var(--text-main)' : 'var(--text-muted)',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                fontFamily: 'inherit'
+              }}
+              id="tab-register"
+            >
+              New Student Setup
             </button>
           </div>
 
@@ -242,7 +227,7 @@ export default function AuthView() {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Shroojan"
+                    placeholder="e.g. Shroojan"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
@@ -254,7 +239,7 @@ export default function AuthView() {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Student"
+                    placeholder="e.g. Gaikwad"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
@@ -265,25 +250,20 @@ export default function AuthView() {
             )}
 
             <div className="form-group">
-              <label className="form-label">College Email (VOLP)</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="email"
-                  className="form-input"
-                  placeholder="student.id@vit.edu"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  id="input-email"
-                />
-              </div>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                Your institutional login for classroom.volp.in
-              </span>
+              <label className="form-label">College Email</label>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="student.id@vit.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                id="input-email"
+              />
             </div>
 
             <div className="form-group">
-              <label className="form-label">VOLP Password</label>
+              <label className="form-label">College Portal Password</label>
               <input
                 type="password"
                 className="form-input"
@@ -297,95 +277,55 @@ export default function AuthView() {
 
             {error && (
               <div style={{
-                padding: '0.75rem',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                color: '#fb7185',
+                padding: '0.75rem 0.9rem',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'rgba(234, 67, 53, 0.12)',
+                border: '1px solid rgba(234, 67, 53, 0.3)',
+                color: '#fca5a5',
                 fontSize: '0.8rem',
-                marginBottom: '1rem',
+                marginBottom: '1.25rem',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
+                alignItems: 'flex-start',
+                gap: '0.55rem',
+                lineHeight: 1.4
               }}>
-                <AlertCircle size={15} />
+                <AlertCircle size={15} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>{error}</span>
-              </div>
-            )}
-
-            {/* Notice if backend auth route is pending */}
-            {endpointMissingNotice && (
-              <div style={{
-                padding: '0.85rem',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                color: '#fbbf24',
-                fontSize: '0.8rem',
-                marginBottom: '1rem',
-                lineHeight: 1.5
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, marginBottom: '0.3rem' }}>
-                  <AlertCircle size={15} /> Backend Route Pending
-                </div>
-                The backend route <code>POST /api/auth/{tab}</code> is not yet mounted on the Express server.
-                <div style={{ marginTop: '0.6rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo()}
-                    className="btn-primary"
-                    style={{ width: '100%', fontSize: '0.8rem', padding: '0.5rem' }}
-                    id="btn-preview-demo"
-                  >
-                    <Sparkles size={14} /> Preview Dashboard with Demo Data Now
-                  </button>
-                </div>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem', marginTop: '0.5rem' }}
+              className="btn-amber"
+              style={{
+                width: '100%',
+                padding: '0.7rem',
+                fontSize: '0.88rem',
+                marginTop: '0.5rem'
+              }}
               id="submit-auth-button"
             >
               {loading ? (
-                <span>{statusStep || 'Processing...'}</span>
+                <span>{statusStep || 'Connecting...'}</span>
               ) : (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {tab === 'register' ? 'Verify with VOLP & Register' : 'Sign In to Tracker'}
-                  <ArrowRight size={16} />
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}>
+                  {tab === 'register' ? 'Connect My Account' : 'Open My Desk'}
+                  <ArrowRight size={15} />
                 </span>
               )}
             </button>
           </form>
 
-          {/* Quick Demo Option */}
-          <div style={{
-            marginTop: '1.5rem',
-            paddingTop: '1.25rem',
-            borderTop: '1px solid var(--border-subtle)',
-            textAlign: 'center'
+          <p style={{
+            fontSize: '0.72rem',
+            color: 'var(--text-dim)',
+            textAlign: 'center',
+            marginTop: '1.25rem',
+            lineHeight: 1.4
           }}>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
-              Testing the prototype frontend?
-            </p>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo()}
-              className="btn-secondary"
-              style={{
-                width: '100%',
-                fontSize: '0.82rem',
-                padding: '0.5rem'
-              }}
-              id="quick-demo-button"
-            >
-              <Sparkles size={14} style={{ color: 'var(--accent-amber)' }} />
-              <span>Launch Demo Dashboard Preview</span>
-            </button>
-          </div>
+            Credentials are authenticated directly against classroom.volp.in to fetch your assigned coursework.
+          </p>
         </div>
       </div>
     </div>

@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { 
   checkBackendConnection, 
   loginUser, 
-  registerUser, 
-  triggerResync,
-  mockCourses,
-  mockAssignments 
+  registerUser,
+  setCustomBackendUrl,
+  getCustomBackendUrl,
+  getApiBase
 } from '../services/api';
 
 const AuthContext = createContext();
@@ -24,157 +24,83 @@ export function AuthProvider({ children }) {
     checked: false,
     connected: false,
     status: 0,
+    host: '',
+    apiBase: getApiBase(),
     message: 'Checking backend status...'
   });
 
-  const [syncState, setSyncState] = useState({
-    isSyncing: false,
-    lastSynced: localStorage.getItem('volp_last_synced') || null,
-    status: 'idle',
-    message: ''
-  });
-
-  const [isDemoMode, setIsDemoMode] = useState(false);
-
-  // Check backend connectivity on mount
-  useEffect(() => {
-    async function checkHealth() {
-      const res = await checkBackendConnection();
-      setBackendState({
-        checked: true,
-        connected: res.connected,
-        status: res.status,
-        message: res.message
-      });
-    }
-    checkHealth();
-    const interval = setInterval(checkHealth, 30000);
-    return () => clearInterval(interval);
+  const checkHealth = useCallback(async () => {
+    const res = await checkBackendConnection();
+    setBackendState({
+      checked: true,
+      connected: res.connected,
+      status: res.status,
+      host: res.host || '',
+      apiBase: getApiBase(),
+      message: res.message
+    });
   }, []);
 
+  // Check backend connectivity on mount and periodically
+  useEffect(() => {
+    checkHealth();
+    const interval = setInterval(checkHealth, 15000);
+    return () => clearInterval(interval);
+  }, [checkHealth]);
+
+  const updateBackendUrl = async (newUrl) => {
+    setCustomBackendUrl(newUrl);
+    await checkHealth();
+  };
+
   const login = async (email, password) => {
-    // Attempt real backend call
     const result = await loginUser(email, password);
 
     const activeUser = result.user || result.data?.user;
     if (result.success && activeUser) {
       setUser(activeUser);
       localStorage.setItem('volp_user', JSON.stringify(activeUser));
-      setIsDemoMode(false);
       return { success: true };
-    }
-
-    // If backend route POST /api/auth/login is truly missing
-    if (result.isEndpointMissing) {
-      return {
-        success: false,
-        isEndpointMissing: true,
-        message: result.message || 'Backend auth endpoint is not mounted yet.'
-      };
     }
 
     return {
       success: false,
-      message: result.message || 'Login failed: check your VOLP email and password.'
+      message: result.message || 'Login failed. Please check your credentials.'
     };
   };
 
   const register = async (userData, maybePassword) => {
-    // Attempt real backend call
     const result = await registerUser(userData, maybePassword);
 
     const activeUser = result.user || result.data?.user;
     if (result.success && activeUser) {
       setUser(activeUser);
       localStorage.setItem('volp_user', JSON.stringify(activeUser));
-      setIsDemoMode(false);
       return { success: true };
-    }
-
-    // If backend route POST /api/auth/register is truly missing
-    if (result.isEndpointMissing) {
-      return {
-        success: false,
-        isEndpointMissing: true,
-        message: result.message || 'Backend register endpoint is not mounted yet.'
-      };
     }
 
     return {
       success: false,
-      message: result.message || 'VOLP credential verification failed.'
+      message: result.message || 'Registration failed. Please check your credentials.'
     };
-  };
-
-  const loginDemo = (customUser) => {
-    const demoUser = customUser || {
-      id: 1,
-      email: 'shroojan.1251090062@vit.edu',
-      firstName: 'Shroojan',
-      lastName: 'Student',
-      isActive: true,
-      createdAt: new Date().toISOString()
-    };
-    setUser(demoUser);
-    setIsDemoMode(true);
-    localStorage.setItem('volp_user', JSON.stringify(demoUser));
   };
 
   const logout = () => {
     setUser(null);
-    setIsDemoMode(false);
     localStorage.removeItem('volp_user');
-  };
-
-  const syncNow = async () => {
-    setSyncState(prev => ({ ...prev, isSyncing: true, status: 'syncing', message: 'Triggering VOLP sync...' }));
-    
-    try {
-      const res = await triggerResync();
-      const timestamp = new Date().toLocaleTimeString();
-      localStorage.setItem('volp_last_synced', timestamp);
-
-      if (res.success) {
-        setSyncState({
-          isSyncing: false,
-          lastSynced: timestamp,
-          status: 'success',
-          message: 'Synchronization completed successfully!'
-        });
-      } else {
-        setSyncState({
-          isSyncing: false,
-          lastSynced: timestamp,
-          status: 'warning',
-          message: res.message || 'Sync triggered (processed in background).'
-        });
-      }
-    } catch (err) {
-      setSyncState(prev => ({
-        ...prev,
-        isSyncing: false,
-        status: 'error',
-        message: 'Sync request error'
-      }));
-    }
-
-    setTimeout(() => {
-      setSyncState(prev => ({ ...prev, status: 'idle', message: '' }));
-    }, 4000);
   };
 
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated: !!user,
-      isDemoMode,
       backendState,
-      syncState,
+      checkHealth,
+      updateBackendUrl,
+      customBackendUrl: getCustomBackendUrl(),
       login,
       register,
-      loginDemo,
-      logout,
-      syncNow
+      logout
     }}>
       {children}
     </AuthContext.Provider>
