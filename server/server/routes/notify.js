@@ -12,6 +12,13 @@ router.get("/deadlines", async (req, res) => {
         });
     }
 
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        return res.status(500).json({
+            success: false,
+            error: "SMTP credentials (SMTP_USER and SMTP_PASS) are not configured in environment variables."
+        });
+    }
+
     try {
         const rows = await fetchUpcomingDeadlines(3);
 
@@ -33,21 +40,27 @@ router.get("/deadlines", async (req, res) => {
         }
 
         let sentCount = 0;
+        const errors = [];
 
         for (const [userId, userData] of userMap.entries()) {
-            await sendUserReminder(userData.email, userData.name, userData.assignments);
-            sentCount++;
-            console.log(`Sent reminder email to ${userData.email}
-(${userData.assignments.length} assignments)`);
+            try {
+                await sendUserReminder(userData.email, userData.name, userData.assignments);
+                sentCount++;
+                console.log(`Sent reminder email to ${userData.email} (${userData.assignments.length} assignments)`);
+            } catch (mailErr) {
+                console.error(`Failed to send email to ${userData.email}:`, mailErr.message);
+                errors.push({ email: userData.email, error: mailErr.message });
+            }
         }
 
         return res.status(200).json({
             success: true,
             message: `Dispatched deadline reminders to ${sentCount} user(s).`,
-            totalUsersNotified: sentCount
+            totalUsersNotified: sentCount,
+            errors: errors.length > 0 ? errors : undefined
         });
     } catch (error) {
-        console.error("Failed to send deadline notifications:", error);
+        console.error("Failed to process deadline notifications:", error);
         return res.status(500).json({ success: false, error: error.message });
     }
 })

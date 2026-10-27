@@ -3,6 +3,8 @@ import { allUsersSync } from "../../sync/sync.js";
 
 const router = express.Router();
 
+let isSyncInProgress = false;
+
 function isVolpAvailable() {
     const istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
 
@@ -12,8 +14,7 @@ function isVolpAvailable() {
     return hour < 24 && hour >= 7;
 }
 
-router.get("/", async (req, res) => {
-
+router.get("/", (req, res) => {
     const clientSecret = req.headers["x-cron-secret"] || req.query.secret;
     if (clientSecret !== process.env.CRON_SECRET) {
         return res.status(401).json({ error: "Unauthorized cron trigger." });
@@ -28,18 +29,34 @@ router.get("/", async (req, res) => {
         });
     }
 
-    try {
-        await allUsersSync();
-        res.status(200).json({
-            response: "Sync Successful."
-        })
-    } catch (error) {
-        console.error("Failed to sync: ", error);
-
-        res.status(500).json({
-            error: "Failed to sync."
+    if (isSyncInProgress) {
+        console.log("[VOLP Sync] Sync requested while a previous sync is still running. Skipping duplicate trigger.");
+        return res.status(200).json({
+            success: true,
+            status: "already_running",
+            message: "A sync process is already actively running."
         });
     }
+
+    // Send immediate response so cronjob services (like cron-job.org) do not time out
+    res.status(202).json({
+        success: true,
+        status: "sync_started",
+        message: "VOLP background sync initiated successfully."
+    });
+
+    // Run scraper in the background
+    isSyncInProgress = true;
+    allUsersSync()
+        .then(() => {
+            console.log("[VOLP Sync] Background sync completed successfully.");
+        })
+        .catch((error) => {
+            console.error("[VOLP Sync] Background sync failed:", error);
+        })
+        .finally(() => {
+            isSyncInProgress = false;
+        });
 });
 
 export default router;

@@ -3,15 +3,34 @@ import { config } from "dotenv";
 
 config();
  
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT) || 465,
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+const port = Number(process.env.SMTP_PORT) || 465;
+const isSecure = process.env.SMTP_SECURE !== undefined
+    ? process.env.SMTP_SECURE === "true"
+    : port === 465;
+
+const transporter = (!process.env.SMTP_HOST || process.env.SMTP_HOST === "smtp.gmail.com")
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
+    })
+    : nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: port,
+        secure: isSecure,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
+    });
 
 function generateEmailHTML(studentName, assignments) {
     const listItems = assignments.map(a => {
