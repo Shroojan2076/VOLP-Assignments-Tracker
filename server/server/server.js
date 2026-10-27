@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-app.get(["/api/health", "/health"], (req, res) => {
+app.get("/api/health", (req, res) => {
     res.status(200).json({
         status: "online",
         host: req.get("host") || "localhost",
@@ -22,10 +22,10 @@ app.get(["/api/health", "/health"], (req, res) => {
     });
 });
 
-app.use(["/api/resync", "/resync"], reSyncRouter);
-app.use(["/api/auth", "/auth"], authRouter);
-app.use(["/api/fetch", "/fetch"], fetchRouter);
-app.use(["/api/notify", "/notify"], NotifyRouter);
+app.use("/api/resync", reSyncRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/fetch", fetchRouter);
+app.use("/api/notify", NotifyRouter);
 
 
 app.listen(port, () => {
