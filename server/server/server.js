@@ -14,6 +14,14 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
+app.get("/api/health", (req, res) => {
+    res.status(200).json({
+        status: "online",
+        host: req.get("host") || "localhost",
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.use("/api/resync", reSyncRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/fetch", fetchRouter);
