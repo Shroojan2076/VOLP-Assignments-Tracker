@@ -26,24 +26,25 @@ export default function DashboardView() {
   const [loading, setLoading] = useState(true);
   const [activeModalAssignment, setActiveModalAssignment] = useState(null);
 
-  const loadData = async () => {
-    setLoading(true);
-    const [coursesRes, assignmentsRes] = await Promise.all([
+  useEffect(() => {
+    let active = true;
+    Promise.all([
       getCourses(user?.email),
       getAssignments(user?.email)
-    ]);
-    setCourses(coursesRes.data || []);
-    setAssignments(assignmentsRes.data || []);
-    setLoading(false);
-  };
+    ]).then(([coursesRes, assignmentsRes]) => {
+      if (!active) return;
+      setCourses(coursesRes.data || []);
+      setAssignments(assignmentsRes.data || []);
+      setLoading(false);
+    });
 
-  useEffect(() => {
-    loadData();
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   return (
     <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Human Masthead Greeting */}
       <div style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -85,10 +86,8 @@ export default function DashboardView() {
         </div>
       </div>
 
-      {/* Stats Summary Bulletin */}
       <StatsOverview courses={courses} assignments={assignments} />
 
-      {/* Empty State when no courses have synced yet */}
       {courses.length === 0 && !loading && (
         <div className="craft-card" style={{
           padding: '3rem 2rem',
@@ -106,7 +105,6 @@ export default function DashboardView() {
         </div>
       )}
 
-      {/* Courses Explorer */}
       <CourseGrid
         courses={courses}
         assignments={assignments}
@@ -114,14 +112,12 @@ export default function DashboardView() {
         onSelectCourse={setSelectedCourseId}
       />
 
-      {/* Assignments Hub */}
       <AssignmentList
         assignments={assignments}
         selectedCourseId={selectedCourseId}
         onSelectAssignment={setActiveModalAssignment}
       />
 
-      {/* Assignment Modal if opened */}
       {activeModalAssignment && (
         <AssignmentModal
           assignment={activeModalAssignment}

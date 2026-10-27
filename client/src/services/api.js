@@ -31,7 +31,6 @@ export function getTargetHost() {
       return apiBase;
     }
   }
-  // Default expected backend host rather than frontend port
   return 'localhost:3000';
 }
 
@@ -58,7 +57,7 @@ export async function checkBackendConnection() {
       host: dynamicHost,
       message: `Backend reachable at ${dynamicHost} (Status: ${res.status})`
     };
-  } catch (err) {
+  } catch {
     return {
       connected: false,
       status: 0,
@@ -124,7 +123,7 @@ export async function loginUser(email, password) {
       success: false, 
       message: data.message || data.error || (res.status === 401 ? 'Invalid password.' : 'Login failed.') 
     };
-  } catch (err) {
+  } catch {
     return { 
       success: false, 
       isNetworkError: true, 
@@ -163,7 +162,7 @@ export async function registerUser(credentials, maybePassword) {
       success: false, 
       message: data.message || data.error || 'Registration failed: verification rejected credentials.' 
     };
-  } catch (err) {
+  } catch {
     return { 
       success: false, 
       isNetworkError: true, 
@@ -186,7 +185,7 @@ export async function getCourses(userEmail) {
       return { success: true, data: normalized };
     }
     return { success: false, data: [] };
-  } catch (err) {
+  } catch {
     return { success: false, data: [] };
   }
 }
@@ -207,7 +206,7 @@ export async function getAssignments(userEmail, courseId) {
       return { success: true, data: normalized };
     }
     return { success: false, data: [] };
-  } catch (err) {
+  } catch {
     return { success: false, data: [] };
   }
 }

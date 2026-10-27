@@ -13,10 +13,8 @@ function formatHumanDeadline(dueDateStr) {
   if (!dueDateStr) return 'No due date set';
   const now = new Date();
   const due = new Date(dueDateStr);
-  
   const timeStr = due.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   
-  // Calculate day difference
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDueDate = new Date(due.getFullYear(), due.getMonth(), due.getDate());
   const diffDays = Math.round((startOfDueDate - startOfToday) / (1000 * 60 * 60 * 24));
@@ -44,13 +42,13 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
     }
   };
 
-  // Filter logic
-  const filtered = assignments.filter(item => {
+  const now = new Date();
+
+  const filtered = assignments.filter((item) => {
     if (selectedCourseId && item.courseId !== selectedCourseId) {
       return false;
     }
 
-    const now = new Date();
     const isOverdue = !item.submitted && item.dueDate && new Date(item.dueDate) < now;
 
     if (activeFilter === 'pending' && item.submitted) return false;
@@ -86,7 +84,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
       };
     }
 
-    const now = new Date();
     const due = new Date(item.dueDate);
     const grace = item.graceDate ? new Date(item.graceDate) : null;
 
@@ -131,6 +128,14 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
     };
   };
 
+  const filterTabs = [
+    { id: 'all', label: 'All Assignments', count: assignments.length },
+    { id: 'pending', label: 'Needs Action', count: assignments.filter(a => !a.submitted).length },
+    { id: 'submitted', label: 'Turned In', count: assignments.filter(a => a.submitted).length },
+    { id: 'graded', label: 'Graded', count: assignments.filter(a => a.evaluated).length },
+    { id: 'overdue', label: 'Past Deadline', count: assignments.filter(a => !a.submitted && a.dueDate && new Date(a.dueDate) < now).length }
+  ];
+
   return (
     <div>
       <div style={{
@@ -150,7 +155,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
           </p>
         </div>
 
-        {/* Search Input */}
         <div style={{
           position: 'relative',
           minWidth: '240px',
@@ -170,7 +174,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
         </div>
       </div>
 
-      {/* Filter Tabs */}
       <div style={{
         display: 'flex',
         gap: '0.4rem',
@@ -178,13 +181,7 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
         paddingBottom: '0.4rem',
         marginBottom: '1.25rem'
       }}>
-        {[
-          { id: 'all', label: 'All Assignments', count: assignments.length },
-          { id: 'pending', label: 'Needs Action', count: assignments.filter(a => !a.submitted).length },
-          { id: 'submitted', label: 'Turned In', count: assignments.filter(a => a.submitted).length },
-          { id: 'graded', label: 'Graded', count: assignments.filter(a => a.evaluated).length },
-          { id: 'overdue', label: 'Past Deadline', count: assignments.filter(a => !a.submitted && new Date(a.dueDate) < new Date()).length }
-        ].map(tab => {
+        {filterTabs.map(tab => {
           const isActive = activeFilter === tab.id;
           return (
             <button
@@ -223,7 +220,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
         })}
       </div>
 
-      {/* Assignment List */}
       {filtered.length === 0 ? (
         <div className="craft-card" style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
           <CheckCircle2 size={32} style={{ color: 'var(--accent-amber)', margin: '0 auto 0.75rem auto', opacity: 0.8 }} />
@@ -255,7 +251,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
                 }}
                 id={`assignment-card-${item.assignmentId}`}
               >
-                {/* Left: Course tag, status badge, Question excerpt */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.45rem', flexWrap: 'wrap' }}>
                     <span style={{
@@ -295,7 +290,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
                   </p>
                 </div>
 
-                {/* Right: Human Deadline, Evaluation / Weightage, Action button */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -303,7 +297,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
                   gap: '1rem',
                   flexWrap: 'wrap'
                 }}>
-                  {/* Deadline info */}
                   <div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '0.15rem' }}>
                       Target Deadline
@@ -313,7 +306,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
                     </div>
                   </div>
 
-                  {/* Marks / Evaluation */}
                   <div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '0.15rem' }}>
                       Evaluation
@@ -323,7 +315,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
                     </div>
                   </div>
 
-                  {/* Open Dossier button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -343,7 +334,6 @@ export default function AssignmentList({ assignments = [], selectedCourseId, onS
         </div>
       )}
 
-      {/* Internal Modal fallback if not passed from parent */}
       {internalModalAssignment && (
         <AssignmentModal
           assignment={internalModalAssignment}

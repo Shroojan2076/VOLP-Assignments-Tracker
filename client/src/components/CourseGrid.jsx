@@ -47,7 +47,6 @@ export default function CourseGrid({ courses = [], assignments = [], selectedCou
         {courses.map(course => {
           const isSelected = selectedCourseId === course.courseId;
 
-          // Compute course assignment counts
           const courseAssignments = assignments.filter(a => a.courseId === course.courseId);
           const pendingCourseCount = courseAssignments.filter(a => !a.submitted).length;
           const submittedCourseCount = courseAssignments.filter(a => a.submitted).length;
@@ -71,7 +70,6 @@ export default function CourseGrid({ courses = [], assignments = [], selectedCou
               id={`course-card-${course.courseId}`}
             >
               <div>
-                {/* Header row: Course code badge & status */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <span style={{
                     fontFamily: 'var(--font-mono)',
@@ -93,7 +91,6 @@ export default function CourseGrid({ courses = [], assignments = [], selectedCou
                   )}
                 </div>
 
-                {/* Course Name */}
                 <h4 style={{
                   fontSize: '0.92rem',
                   fontWeight: 600,
@@ -109,7 +106,6 @@ export default function CourseGrid({ courses = [], assignments = [], selectedCou
                   {course.name}
                 </h4>
 
-                {/* Faculty Name */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -125,7 +121,6 @@ export default function CourseGrid({ courses = [], assignments = [], selectedCou
                 </div>
               </div>
 
-              {/* Footer status summary */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',

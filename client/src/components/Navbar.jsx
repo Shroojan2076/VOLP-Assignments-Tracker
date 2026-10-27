@@ -42,7 +42,6 @@ export default function Navbar() {
       gap: '1rem',
       flexWrap: 'wrap'
     }}>
-      {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <div style={{
           width: '34px',
@@ -73,7 +72,6 @@ export default function Navbar() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-        {/* Subtle, refined connection pill */}
         <button
           onClick={() => {
             setUrlInput(customBackendUrl || '');
@@ -89,7 +87,7 @@ export default function Navbar() {
             fontSize: '0.73rem',
             backgroundColor: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid var(--border-subtle)',
-            color: varStatusColor(backendState.connected),
+            color: backendState.connected ? 'var(--text-main)' : 'var(--text-muted)',
             cursor: 'pointer',
             fontFamily: 'inherit',
             transition: 'all 0.15s ease'
@@ -109,7 +107,6 @@ export default function Navbar() {
           <SlidersHorizontal size={11} style={{ opacity: 0.6, marginLeft: '0.15rem' }} />
         </button>
 
-        {/* User profile & Logout */}
         {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
@@ -160,7 +157,6 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Backend Settings Dialog */}
       {showConfig && (
         <div style={{
           position: 'fixed',
@@ -244,8 +240,4 @@ export default function Navbar() {
       )}
     </header>
   );
-}
-
-function varStatusColor(connected) {
-  return connected ? 'var(--text-main)' : 'var(--text-muted)';
 }

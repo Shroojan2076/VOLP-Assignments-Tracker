@@ -22,8 +22,9 @@ function formatModalDate(dateStr) {
 export default function AssignmentModal({ assignment, onClose }) {
   if (!assignment) return null;
 
-  const isOverdue = !assignment.submitted && assignment.dueDate && new Date(assignment.dueDate) < new Date();
-  const isGraceActive = !assignment.submitted && isOverdue && assignment.graceDate && new Date(assignment.graceDate) > new Date();
+  const now = new Date();
+  const isOverdue = !assignment.submitted && assignment.dueDate && new Date(assignment.dueDate) < now;
+  const isGraceActive = !assignment.submitted && isOverdue && assignment.graceDate && new Date(assignment.graceDate) > now;
 
   return (
     <div style={{
@@ -54,7 +55,6 @@ export default function AssignmentModal({ assignment, onClose }) {
           boxShadow: 'var(--shadow-elevated)'
         }}
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           style={{
@@ -75,7 +75,6 @@ export default function AssignmentModal({ assignment, onClose }) {
           <X size={18} />
         </button>
 
-        {/* Top Badges */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
           <span style={{
             fontFamily: 'var(--font-mono)',
@@ -115,7 +114,6 @@ export default function AssignmentModal({ assignment, onClose }) {
           )}
         </div>
 
-        {/* Course Reference & Title */}
         <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginBottom: '0.25rem', fontFamily: 'var(--font-mono)' }}>
           Reference #{assignment.assignmentId}
         </div>
@@ -123,7 +121,6 @@ export default function AssignmentModal({ assignment, onClose }) {
           {assignment.courseName ? assignment.courseName : 'Subjective Coursework Dossier'}
         </h3>
 
-        {/* Question Text Box */}
         <div style={{
           backgroundColor: 'var(--bg-inset)',
           border: '1px solid var(--border-subtle)',
@@ -142,14 +139,12 @@ export default function AssignmentModal({ assignment, onClose }) {
           </div>
         </div>
 
-        {/* Details Grid */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '0.85rem',
           marginBottom: '1.5rem'
         }}>
-          {/* Due Date */}
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
@@ -165,7 +160,6 @@ export default function AssignmentModal({ assignment, onClose }) {
             </div>
           </div>
 
-          {/* Grace Date */}
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
@@ -181,7 +175,6 @@ export default function AssignmentModal({ assignment, onClose }) {
             </div>
           </div>
 
-          {/* Marks */}
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
@@ -197,7 +190,6 @@ export default function AssignmentModal({ assignment, onClose }) {
             </div>
           </div>
 
-          {/* Score */}
           <div style={{
             padding: '0.85rem',
             borderRadius: 'var(--radius-sm)',
@@ -214,7 +206,6 @@ export default function AssignmentModal({ assignment, onClose }) {
           </div>
         </div>
 
-        {/* Submission Details if submitted */}
         {assignment.submitted && (
           <div style={{
             padding: '0.9rem 1.1rem',
@@ -238,7 +229,6 @@ export default function AssignmentModal({ assignment, onClose }) {
           </div>
         )}
 
-        {/* Footer actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
           <button
             onClick={onClose}

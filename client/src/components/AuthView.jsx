@@ -12,7 +12,6 @@ export default function AuthView() {
   const { login, register } = useAuth();
   const [tab, setTab] = useState('login');
 
-  // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -64,7 +63,6 @@ export default function AuthView() {
         gap: '3rem',
         alignItems: 'center'
       }}>
-        {/* Left Column: Human, editorial, warm copy */}
         <div>
           <span className="stamp stamp-amber" style={{ marginBottom: '1.25rem' }}>
             Academic Field Guide
@@ -167,9 +165,7 @@ export default function AuthView() {
           </div>
         </div>
 
-        {/* Right Column: Clean Stationery Card */}
         <div className="craft-card" style={{ padding: '2rem' }}>
-          {/* Notebook Tab Switcher */}
           <div style={{
             display: 'flex',
             backgroundColor: 'var(--bg-inset)',
@@ -218,7 +214,6 @@ export default function AuthView() {
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit}>
             {tab === 'register' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>

@@ -41,12 +41,39 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
-  // Check backend connectivity on mount and periodically
   useEffect(() => {
-    checkHealth();
-    const interval = setInterval(checkHealth, 15000);
-    return () => clearInterval(interval);
-  }, [checkHealth]);
+    let active = true;
+    checkBackendConnection().then((res) => {
+      if (!active) return;
+      setBackendState({
+        checked: true,
+        connected: res.connected,
+        status: res.status,
+        host: res.host || '',
+        apiBase: getApiBase(),
+        message: res.message
+      });
+    });
+
+    const interval = setInterval(() => {
+      checkBackendConnection().then((res) => {
+        if (!active) return;
+        setBackendState({
+          checked: true,
+          connected: res.connected,
+          status: res.status,
+          host: res.host || '',
+          apiBase: getApiBase(),
+          message: res.message
+        });
+      });
+    }, 15000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const updateBackendUrl = async (newUrl) => {
     setCustomBackendUrl(newUrl);
@@ -55,7 +82,6 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const result = await loginUser(email, password);
-
     const activeUser = result.user || result.data?.user;
     if (result.success && activeUser) {
       setUser(activeUser);
@@ -71,7 +97,6 @@ export function AuthProvider({ children }) {
 
   const register = async (userData, maybePassword) => {
     const result = await registerUser(userData, maybePassword);
-
     const activeUser = result.user || result.data?.user;
     if (result.success && activeUser) {
       setUser(activeUser);

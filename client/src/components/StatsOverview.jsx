@@ -15,7 +15,6 @@ export default function StatsOverview({ courses = [], assignments = [] }) {
   const pendingCount = assignments.filter(a => !a.submitted).length;
   const evaluatedCount = assignments.filter(a => a.evaluated).length;
 
-  // Calculate average evaluated score percentage
   const scoredAssignments = assignments.filter(a => a.evaluated && a.score !== null && a.marks > 0);
   const avgScorePct = scoredAssignments.length > 0
     ? (scoredAssignments.reduce((acc, curr) => acc + (curr.score / curr.marks) * 100, 0) / scoredAssignments.length).toFixed(1)
@@ -28,7 +27,6 @@ export default function StatsOverview({ courses = [], assignments = [] }) {
       gap: '1rem',
       marginBottom: '2rem'
     }}>
-      {/* Metric 1: Pending Tasks */}
       <div className="craft-card" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
@@ -60,7 +58,6 @@ export default function StatsOverview({ courses = [], assignments = [] }) {
         </div>
       </div>
 
-      {/* Metric 2: Completed Submissions */}
       <div className="craft-card" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
@@ -94,7 +91,6 @@ export default function StatsOverview({ courses = [], assignments = [] }) {
         </div>
       </div>
 
-      {/* Metric 3: Academic Benchmark */}
       <div className="craft-card" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
@@ -126,7 +122,6 @@ export default function StatsOverview({ courses = [], assignments = [] }) {
         </div>
       </div>
 
-      {/* Metric 4: Enrolled Courses */}
       <div className="craft-card" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
