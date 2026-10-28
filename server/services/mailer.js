@@ -2,38 +2,27 @@ import nodemailer from "nodemailer";
 import { config } from "dotenv";
 
 config();
- 
-const port = Number(process.env.SMTP_PORT) || 465;
-const isSecure = process.env.SMTP_SECURE !== undefined
-    ? process.env.SMTP_SECURE === "true"
-    : port === 2525;
 
-const transporter = (!process.env.SMTP_HOST || process.env.SMTP_HOST === "smtp.gmail.com")
-    ? nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: false,
-        requireTLS: true,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-    })
-    : nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: port,
-        secure: false,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-    });
+const smtpHost = process.env.SMTP_HOST || "smtp-relay.brevo.com";
+const smtpPort = Number(process.env.SMTP_PORT) || 2525;
+
+if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    throw new Error("Missing SMTP_USER or SMTP_PASS environment variable");
+}
+
+const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    requireTLS: smtpPort !== 465,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 30000,
+});
 
 function generateEmailHTML(studentName, assignments) {
     const listItems = assignments.map(a => {
