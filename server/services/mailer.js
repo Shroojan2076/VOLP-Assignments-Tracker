@@ -1,17 +1,19 @@
 import nodemailer from "nodemailer";
 import { config } from "dotenv";
-import { response } from "express";
 
 config();
  
 const port = Number(process.env.SMTP_PORT) || 465;
 const isSecure = process.env.SMTP_SECURE !== undefined
     ? process.env.SMTP_SECURE === "true"
-    : port === 465;
+    : port === 2525;
 
 const transporter = (!process.env.SMTP_HOST || process.env.SMTP_HOST === "smtp.gmail.com")
     ? nodemailer.createTransport({
-        service: "gmail",
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: false,
+        requireTLS: true,
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
@@ -23,7 +25,7 @@ const transporter = (!process.env.SMTP_HOST || process.env.SMTP_HOST === "smtp.g
     : nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: port,
-        secure: isSecure,
+        secure: false,
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
@@ -71,19 +73,11 @@ function generateEmailHTML(studentName, assignments) {
 
 export async function sendUserReminder(studentEmail, studentName, assignments) {
     const htmlContent = generateEmailHTML(studentName, assignments);
-    try {
-        return transporter.sendMail({
-            from: process.env.EMAIL_FROM || process.env.SMTP_USER,
-            to: studentEmail,
-            subject: `VOLP Reminder: ${assignments.length} Assignment(s) Due in Next 3 Days`,
-            html: htmlContent       
-        });
-    } catch (err) {
-        console.error("Email sending failed: ", {
-            code: err.code,
-            command: err.command,
-            message: err.message,
-            response: err.response
-        })
-    }
+
+    return transporter.sendMail({
+        from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+        to: studentEmail,
+        subject: `VOLP Reminder: ${assignments.length} Assignment(s) Due in Next 3 Days`,
+        html: htmlContent
+    });
 }
