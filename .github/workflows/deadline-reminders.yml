@@ -3,7 +3,7 @@ name: Dispatch VOLP Deadline Reminders
 on:
   schedule:
     # 02:30 UTC = 08:00 AM IST daily
-    - cron: '30 3 * * *'
+    - cron: '30 9 * * *'
   workflow_dispatch: # Allows manual click trigger from GitHub Actions tab
 
 jobs:
