@@ -3,7 +3,7 @@ name: Dispatch VOLP Deadline Reminders
 on:
   schedule:
     # 02:30 UTC = 08:00 AM IST daily
-    - cron: '30 2 * * *'
+    - cron: '30 3 * * *'
   workflow_dispatch: # Allows manual click trigger from GitHub Actions tab
 
 jobs:
@@ -28,6 +28,7 @@ jobs:
       - name: Run Deadline Notification Dispatcher
         working-directory: server
         env:
+          TZ: Asia/Kolkata # Forces Node.js to use Indian Standard Time for date calculations
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
