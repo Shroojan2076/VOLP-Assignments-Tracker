@@ -38,16 +38,15 @@ router.get("/", (req, res) => {
         });
     }
 
-    // Send immediate response so cronjob services (like cron-job.org) do not time out
     res.status(202).json({
         success: true,
         status: "sync_started",
         message: "VOLP background sync initiated successfully."
     });
 
-    // Run scraper in the background
-    isSyncInProgress = true;
-    allUsersSync()
+    setImmediate(() => {
+        isSyncInProgress = true;
+        allUsersSync()
         .then(() => {
             console.log("[VOLP Sync] Background sync completed successfully.");
         })
@@ -57,6 +56,7 @@ router.get("/", (req, res) => {
         .finally(() => {
             isSyncInProgress = false;
         });
+    })
 });
 
 export default router;

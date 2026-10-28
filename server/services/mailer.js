@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { config } from "dotenv";
+import { response } from "express";
 
 config();
  
@@ -70,11 +71,19 @@ function generateEmailHTML(studentName, assignments) {
 
 export async function sendUserReminder(studentEmail, studentName, assignments) {
     const htmlContent = generateEmailHTML(studentName, assignments);
-
-    return transporter.sendMail({
-        from: process.env.EMAIL_FROM || process.env.SMTP_USER,
-        to: studentEmail,
-        subject: `VOLP Reminder: ${assignments.length} Assignment(s) Due in Next 3 Days`,
-        html: htmlContent
-    });
+    try {
+        return transporter.sendMail({
+            from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+            to: studentEmail,
+            subject: `VOLP Reminder: ${assignments.length} Assignment(s) Due in Next 3 Days`,
+            html: htmlContent       
+        });
+    } catch (err) {
+        console.error("Email sending failed: ", {
+            code: err.code,
+            command: err.command,
+            message: err.message,
+            response: err.response
+        })
+    }
 }
